@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<nav id="maldroidNavbar" class="navbar navbar-default navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbarCollapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="{{ url_for('home') }}">malDroid</a>
+        </div>
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="{{ url_for('about') }}">About</a></li>
+                <li><a href="https://github.com/Poppyseedplehzr/maldroid" target="_blank">Source</a></li>
+                <li><a href="{{ url_for('contact') }}">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+
+    <div class="jumbotron">
+        <h1>About malDroid</h1>
+        <p>malDroid is an open source Andoird APK malware scanner, designed to aid in forensic analysis.  Originally devloped as a class project for NYU Polytechnic School of Engineering's Mobile Security course during Fall of 2014, this project hopes to grow into a framework that can be used by Malware Researchers, Incident Responders, and Academcis, excited about malware reserach.</p>    
+    </div>
+
+</div>
+{% endblock %}

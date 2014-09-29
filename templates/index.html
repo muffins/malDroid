@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<nav id="maldroidNavbar" class="navbar navbar-default navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbarCollapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="{{ url_for('home') }}">malDroid</a>
+        </div>
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="nav navbar-nav">
+                <li><a href="{{ url_for('about') }}">About</a></li>
+                <li><a href="https://github.com/Poppyseedplehzr/maldroid" target="_blank">Source</a></li>
+                <li><a href="{{ url_for('contact') }}">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+
+    <div class="jumbotron">
+        <h1>Welcome to malDroid</h1>
+        <p>Welcome to the Android Malicious Application Scanner, or malDroid.  This utility is designed to scan potentially malicious .APK files and provide as much information as possible for forensic analysis or incident response.<br>This site is a project for CS 9223: Mobile Security, Fall 2014</p>
+        
+    </div>
+    <div class="row">
+		<div class="col-md-8 col-md-offset-5">
+			<h2>Upload an APK</h2>
+			<form action="{{ url_for('upload') }}" method=post enctype=multipart/form-data>
+	    		<p>
+	    			<input type=file name=file>
+	    			<input type=submit value=Upload>
+	    		</p>
+			</form>
+		</div>
+    </div>
+    <hr>
+</div>
+{% endblock %}

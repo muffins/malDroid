@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<nav id="maldroidNavbar" class="navbar navbar-default navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbarCollapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="{{ url_for('home') }}">malDroid</a>
+        </div>
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="nav navbar-nav">
+                <li><a href="{{ url_for('about') }}">About</a></li>
+                <li><a href="https://github.com/Poppyseedplehzr/maldroid" target="_blank">Source</a></li>
+                <li class="active"><a href="{{ url_for('contact') }}">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+
+    <div class="jumbotron">
+        <h1>Contact Us</h1>
+        <p>Welcoem to the Android Malicious Application Scanner, or malDroid.  This utility is designed to scan potentially malicious .APK files, in the aid of frensic analysis of malicious applications of executables found on Android mobile devices.  This is an Open Source project for the Mobile Security course at NYU: Polytechnic School of Engineering, Fall 2014.</p>
+        <h2>Contributing</h2>
+        <p>If you're interested in contributing to malDroid, check out our <a href="https://github.com/Poppyseedplehzr/maldroid">github</a>.</p>
+        <h2>Authors</h2>
+        <p>Nick Anderson - nba237@nyu.edu<br>
+        Michael Thompson - mt1553@nyu.edu</p>
+        
+    </div>
+
+</div>
+{% endblock %}

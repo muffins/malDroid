@@ -1,17 +1,13 @@
 <!doctype html>
-<title>Maldroid Malicious App Scanner</title>
-<link rel=stylesheet type=text/css href="static/css/bootstrap.css" >
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>malDroid - Malicious Android App Scanner</title>
+<link rel="stylesheet" href="static/css/bootstrap.min.css">
+<link rel="stylesheet" href="static/css/bootstrap-theme.min.css">
+<script src="static/js/jquery.min.js"></script>
+<script src="static/js/bootstrap.min.js"></script>
+</head>
 <div class=page>
-	<h1>Maldroid Malicious App Scanner</h1>
-	<div class=metanav>
-		{% if not session.logged_in %}
-			<a href="{{ url_for('login') }}">log in</a>
-		{% else %}
-			<a href="{{ url_for('logout') }}">log out</a>
-		{% endif %}
-	</div>
-	{% for message in get_flashed_messages() %}
-		<div class=flash>{{ message }} </div>
-	{% endfor %}
 	{% block body %}{% endblock %}
 </div>
