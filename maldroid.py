@@ -8,16 +8,19 @@ from werkzeug import secure_filename
 # Create and Configure the flask app
 app = Flask(__name__)
 UPLOAD_FOLDER = './uploads/apk_samples'
-ALLOWED_EXTENSIONS = set(['txt','png','jpg','jpeg','gif']) # Default upload ext set
 app.config.from_object(__name__)
 app.config.update(dict(
 	DATABASE = os.path.join(app.root_path, 'maldroid.db'),
 	DEBUG = True,
-	UPLOAD_FOLDER = UPLOAD_FOLDER
+	UPLOAD_FOLDER = UPLOAD_FOLDER,
+	MAX_CONTENT_LENGTH = 32 * 1024 * 1024 # Limit upload size to 30MB
 	#SECRET_KEY = 'd3v3lopm3nt_k3y',
 	#USERNAME = 'admin',
 	#PASSWORD = 'default'
 	))
+
+
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 
 """ Connect to the sqlite db """
@@ -54,7 +57,7 @@ def init_db():
 # file itself is appropriate to be on our server, as opposed to
 # having a proper file extension :P
 def allowed_file(fname):
-	return '.' in fname and fname.split('.')[-1] in ALLOWED_EXTENSIONS
+	return '.' in fname and fname.split('.')[-1] == 'apk'
 
 
 @app.route('/upload', methods=['GET','POST'])
@@ -65,7 +68,7 @@ def upload():
 			fname = secure_filename(file.filename)
 			file.save(os.path.join(app.config['UPLOAD_FOLDER'], fname))
 			return redirect(url_for('report', fname=fname))
-	return redirect(url_for('error'))
+	return redirect(url_for('invalid_file'))
 
 
 #@app.route('/report', methods=['GET','POST'])
@@ -93,7 +96,12 @@ def contact():
 def about():
 	return render_template('about.html')
 
-# Generic error page
+# Page for invalid file type.
+@app.route('/invalid_file')
+def invalid_file():
+	return render_template('invalid_file.html')
+
+# Generic Error page.
 @app.route('/error')
 def error():
 	return render_template('error.html')
