@@ -29,7 +29,7 @@ class analyze:
     def check_db(self):
 
         s = dalvik_elsign.MSignature('signatures/dbandroguard',
-                'signatures/dbconfig', False,
+                'signatures/dbconfig', True,
                 ps=dalvik_elsign.PublicSignature)
 
         if self.a.is_valid_APK():
@@ -58,7 +58,7 @@ class analyze:
         else:
             print 'INVALID'
 
-    def check_risk():
+    def check_risk(self):
 
         ri = risk.RiskIndicator()
         ri.add_risk_analysis(risk.RedFlags())
