@@ -20,9 +20,6 @@ app.config.update(dict(
 	))
 
 
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
-
-
 """ Connect to the sqlite db """
 def connect_db():
 	rv = sqlite3.connect(app.config['DATABASE'])
@@ -70,8 +67,7 @@ def upload():
 			return redirect(url_for('report', fname=fname))
 	return redirect(url_for('invalid_file'))
 
-
-#@app.route('/report', methods=['GET','POST'])
+""" Route for reports page """
 @app.route('/report')
 def report():
 	apkname = request.args.get('fname')
@@ -114,5 +110,3 @@ def error():
 # android APKs, so that our server isn't being flooded with files :S
 if __name__ == '__main__':
 	app.run()
-
-
