@@ -1,22 +1,42 @@
-# all the imports
+"""
+
+	malDroid.py
+
+	malDroid is a project dedicated to open source mobile malware analysis.  This
+	projects goals are to provide forensic investigators and malware analysts with
+	approachable information regarding the behavior of potentially malicious APK
+	files.
+
+	This project is still under *heavy* construction ;)
+
+	Nick Anderson		- muffins@isis.poly.edu
+	Michael Thompson	- mt1553@nyu.edu
+
+"""
+
 import os
 import sqlite3
+import hashlib
+import json
+import time
 from time import gmtime, strftime
 from flask import Flask, request, session, g, redirect, url_for, abort, render_template, flash
 from werkzeug import secure_filename
 
-# Create and Configure the flask app
+
+""" Global Vars :P """
+MAX_UPLOAD_SIZE = 32 * 1024 * 1024 # Limit upload size to 30MB
+UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads/apk_samples')
+
+
+""" Flask application configuration """
 app = Flask(__name__)
-UPLOAD_FOLDER = './uploads/apk_samples'
 app.config.from_object(__name__)
 app.config.update(dict(
 	DATABASE = os.path.join(app.root_path, 'maldroid.db'),
 	DEBUG = True,
 	UPLOAD_FOLDER = UPLOAD_FOLDER,
-	MAX_CONTENT_LENGTH = 32 * 1024 * 1024 # Limit upload size to 30MB
-	#SECRET_KEY = '',,
-	#USERNAME = '',
-	#PASSWORD = ''
+	MAX_CONTENT_LENGTH = MAX_UPLOAD_SIZE
 	))
 
 
@@ -27,86 +47,148 @@ def connect_db():
 	return rv
 
 
-# Open the DB connection if it doesn't already exist
+""" Getter function for the DB connection """
 def get_db():
 	if not hasattr(g, 'sqlite_db'):
 		g.sqlite_db = connect_db()
 	return g.sqlite_db
 
 
-# Close the DB connection at the end of requests.
+""" Close the Database when not in use """
 @app.teardown_appcontext
 def close_db(error):
 	if hasattr(g, 'sqlite_db'):
 		g.sqlite_db.close()
 
 
-# Setup the database.
-def init_db():
+""" Function to stand up the Database and the uploads folder """
+def init_app():
 	with app.app_context():
 		db = get_db()
 		with app.open_resource('schema.sql', mode='r') as f:
 			db.cursor().executescript(f.read())
 		db.commit()
+	if not os.path.exists(UPLOAD_FOLDER):
+		os.makedirs(UPLOAD_FOLDER)
 
 
-# At some point, this needs to be refined, to ensure that the
-# file itself is appropriate to be on our server, as opposed to
-# having a proper file extension :P
+# TODO: Make this more robust, call to 'file' and parse results,
+# find some way to ensure the file is a .APK before commiting to
+# analysis.
+""" Function to ensure that uploaded file is an APK """
 def allowed_file(fname):
 	return '.' in fname and fname.split('.')[-1] == 'apk'
 
 
-@app.route('/upload', methods=['GET','POST'])
+""" Route for uploading sample """
+@app.route('/upload', methods=['POST'])
 def upload():
 	if request.method == 'POST':
 		file = request.files['file']
 		if file and allowed_file(file.filename):
-			fname = secure_filename(file.filename)
-			file.save(os.path.join(app.config['UPLOAD_FOLDER'], fname))
-			return redirect(url_for('report', fname=fname))
+			fname = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(file.filename))
+			# TODO: Potential issue. What happens if I upload different
+			# files with the same name?
+			file.save(fname)
+			return redirect(url_for('analyze', fname=fname))
 	return redirect(url_for('invalid_file'))
 
-""" Route for reports page """
-@app.route('/report')
-def report():
-	apkname = request.args.get('fname')
-	return redirect(url_for('home'))
+
+""" Route to begin analysis of sample. """
+@app.route('/analyze')
+def analyze():
+	full_apk_name = request.args.get('fname')
+	tstamp  = int(time.time())
+	apkname = os.path.basename(full_apk_name)
+	sha     = hashlib.sha256(open(full_apk_name,'r').read()).hexdigest()
+
+	""" Here is where we'll run all of the malware analysis modules """
+	# Place holder report, to test functionality
+	report = json.dumps({'test1':{'res1':"Result of scan 1", 'res2':"Result of scan 2"}})
+	""" End malware analysis """
+
+	# Insert the results into the DB
+	db  = get_db()
+	cur = db.cursor()
+
+	# Ensure that this sample hasn't already been by the DB.
+	cur.execute('SELECT * FROM reports WHERE digest=?', (sha,))
+	if not cur.fetchall():
+		cur.execute('INSERT INTO reports (digest, comname, tstamp, report)\
+		 VALUES (?,?,?,?)', (sha, apkname, tstamp, report))
+	db.commit()
+	return redirect(url_for('submission', fname=apkname, sum=sha))
 
 
+""" Given a specific report, generate the report """
+@app.route('/genreport', methods=['GET', 'POST'])
+def genreport():
+	db  = get_db()
+	cur = db.cursor()
+	r   = request.args.get('selectedreport')
+	cur.execute('SELECT digest, comname, report, tstamp \
+	 	FROM reports WHERE digest=?', (r,))
+	# TODO: What happens if we get more than one : \
+	# we could just use fetchone... We need to ensure
+	# that it will never be the
+	# wait. we shouldn't ever get more than one, as we already
+	# check for this above...
+	#rep = cur.fetchall()[0]
+	rep = cur.fetchone()
+	return render_template('genreport.html', report=rep)
+
+
+""" Route for the reporting engine """
+@app.route('/reports')
+def reports():
+	# Display a selection of all possible reports.
+	db   = get_db()
+	cur  = db.cursor()
+	cur.execute('SELECT * FROM reports ORDER BY tstamp desc')
+	reps = cur.fetchall()
+	return render_template('reports.html', reports=reps)
+
+
+""" Main page, index.html """
 @app.route('/')
 @app.route('/home')
 def home():
-	#db = get_db()
-	#cur = db.execute('select title, text, timestamp from entries order by id desc')
-	#entries = cur.fetchall()
 	return render_template('index.html')
 
-# Route for Contact form
+
+""" Contact form """
 @app.route('/contact')
 def contact():
 	return render_template('contact.html')
 
-# Route for About form
+
+""" About form """
 @app.route('/about')
 def about():
 	return render_template('about.html')
 
-# Page for invalid file type.
+
+""" Error page, used for invalid files """
 @app.route('/invalid_file')
 def invalid_file():
 	return render_template('invalid_file.html')
 
-# Generic Error page.
+
+""" intermediary page, used for placeholder after file submit """
+@app.route('/submission')
+def submission():
+	app_name = request.args.get('fname')
+	sha_sum  = request.args.get('sum')
+	return render_template('submission.html',appname=app_name, digest=sha_sum)
+
+
+""" Generic error page """
 @app.route('/error')
 def error():
 	return render_template('error.html')
 
 
-
-# This is the default manner in which to uplpoad a file in flask.  Right
-# now I'm just following the tutorial here: http://flask.pocoo.org/docs/0.10/patterns/fileuploads/
-# but at some point we'll want to restrict this to very very very specifically
-# android APKs, so that our server isn't being flooded with files :S
+""" Start the app """
 if __name__ == '__main__':
+	init_app()
 	app.run()

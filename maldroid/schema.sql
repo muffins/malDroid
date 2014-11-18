@@ -1,7 +1,15 @@
-drop table if exists entries;
-create table entries (
+drop table if exists reports;
+drop table if exists users;
+create table reports (
   id integer primary key autoincrement,
-  title text not null,
-  timestamp text not null,
-  text text not null
+  digest text not null,
+  comname text,
+  tstamp integer not null,
+  report text not null
+);
+create table users (
+  id integer primary key autoincrement,
+  username text not null,
+  password text not null,
+  timestamp integer not null
 );

@@ -17,7 +17,8 @@
                 <li><a href="{{ url_for('about') }}">About</a></li>
                 <li><a href="https://github.com/Poppyseedplehzr/maldroid" target="_blank">Source</a></li>
                 <li><a href="{{ url_for('contact') }}">Contact</a></li>
-                <li><a href="{{ url_for('reports') }}">Reports</a></li>
+                <li class="active"><a href="{{ url_for('reports') }}">Reports</a></li>
+
             </ul>
         </div>
     </div>
@@ -26,21 +27,21 @@
 <div class="container">
 
     <div class="jumbotron">
-        <h1>Welcome to malDroid</h1>
-        <p>Welcome to the Android Malicious Application Scanner, or malDroid.  This utility is designed to scan potentially malicious Android Applications and provide as much information as possible for forensic and malware analysis.<br>For more information check out what we're all <a href="{{url_for('about')}}">about</a></p>
-    </div>
+      <h2> Reports </h2>
 
-    <div class="row">
-		<div class="col-md-8 col-md-offset-5">
-			<h2>Upload an APK</h2>
-			<form action="{{ url_for('upload') }}" method=post enctype=multipart/form-data>
-	    		<p>
-	    			<input type=file name=file>
-	    			<input type=submit value=Upload>
-	    		</p>
-			</form>
-		</div>
+      {% if reports %}
+        <p> Below you can select from our available analyses:</p>
+        <form action="{{url_for('genreport')}}" id="selection">
+          <select name="selectedreport" form="selection">
+            {% for r in reports %}
+              <option value="{{r.digest}}">{{r.comname|safe}}</option>
+            {% endfor %}
+          </select><br><input type="Submit">
+        </form>
+      {% else %}
+        <p>There are currently no analyses in our database. Please submit a sample <a href="{{url_for('home')}}">here</a> first.</p>
+      {% endif %}
+
     </div>
-    <hr>
 </div>
 {% endblock %}

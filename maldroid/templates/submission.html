@@ -17,7 +17,7 @@
                 <li><a href="{{ url_for('about') }}">About</a></li>
                 <li><a href="https://github.com/Poppyseedplehzr/maldroid" target="_blank">Source</a></li>
                 <li><a href="{{ url_for('contact') }}">Contact</a></li>
-                <li class="active"><a href="{{ url_for('report') }}">Contact</a></li>
+                <li class="active"><a href="{{ url_for('reports') }}">Reports</a></li>
 
             </ul>
         </div>
@@ -25,9 +25,10 @@
 </nav>
 
 <div class="container">
-
     <div class="jumbotron">
-
-      <h1> Reports </h1>
+      <h2> Your sample has been successfully submitted! </h2>
+      <p> To see the results check the <a href="{{ url_for('reports') }}">reports</a> section and select the entry below.</p>
+      <p>{{ appname }}<br>Sha 256: {{ digest }}</p>
     </div>
 </div>
+{% endblock %}

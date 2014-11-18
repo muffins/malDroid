@@ -17,30 +17,19 @@
                 <li><a href="{{ url_for('about') }}">About</a></li>
                 <li><a href="https://github.com/Poppyseedplehzr/maldroid" target="_blank">Source</a></li>
                 <li><a href="{{ url_for('contact') }}">Contact</a></li>
-                <li><a href="{{ url_for('reports') }}">Reports</a></li>
+                <li class="active"><a href="{{ url_for('reports') }}">Reports</a></li>
+
             </ul>
         </div>
     </div>
 </nav>
 
 <div class="container">
-
     <div class="jumbotron">
-        <h1>Welcome to malDroid</h1>
-        <p>Welcome to the Android Malicious Application Scanner, or malDroid.  This utility is designed to scan potentially malicious Android Applications and provide as much information as possible for forensic and malware analysis.<br>For more information check out what we're all <a href="{{url_for('about')}}">about</a></p>
+      <h3>Report for - {{report.comname}}</h3>
+      <p>SHA256 - {{report.digest}}
+        <br>Report - {{report.report}}
+        <br>Time Stamp - {{report.tstamp}}</p>
     </div>
-
-    <div class="row">
-		<div class="col-md-8 col-md-offset-5">
-			<h2>Upload an APK</h2>
-			<form action="{{ url_for('upload') }}" method=post enctype=multipart/form-data>
-	    		<p>
-	    			<input type=file name=file>
-	    			<input type=submit value=Upload>
-	    		</p>
-			</form>
-		</div>
-    </div>
-    <hr>
 </div>
 {% endblock %}

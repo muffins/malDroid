@@ -4,5 +4,7 @@ import logging
 logging.basicConfig(stream=sys.stderr)
 sys.path.insert(0,"/var/www/maldroid/maldroid/")
 
-from maldroid import app as application
+import maldroid
+application = maldroid.app
 application.secret_key = ''
+maldroid.init_app()

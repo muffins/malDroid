@@ -17,7 +17,7 @@
                 <li><a href="{{ url_for('about') }}">About</a></li>
                 <li><a href="https://github.com/Poppyseedplehzr/maldroid" target="_blank">Source</a></li>
                 <li><a href="{{ url_for('contact') }}">Contact</a></li>
-                <li><a href="{{ url_for('report') }}">Contact</a></li>
+                <li><a href="{{ url_for('reports') }}">Reports</a></li>
             </ul>
         </div>
     </div>
@@ -27,7 +27,7 @@
 
     <div class="jumbotron">
         <p>
-            <br>Invalid file type.  Ensure that the file is a '.apk' and less than 32 MB
+            <br>Invalid file type.  Ensure that the file is a valid android application file, with the '.apk' extension, and less than 32 MB
         </p>
         <a class="navbar-brand" href="{{ url_for('home') }}">Retry</a>
     </div>
