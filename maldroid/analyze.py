@@ -66,5 +66,3 @@ class analyze:
             return ri.with_apk(self.a)
         else:
             print 'INVALID'
-
-

@@ -17,23 +17,26 @@
 import os
 import sqlite3
 import hashlib
+import multiprocessing
 import json
 import time
+from analyze import analyze
+from analysisdriver import MAEngine
 from time import gmtime, strftime
 from flask import Flask, request, session, g, redirect, url_for, abort, render_template, flash
 from werkzeug import secure_filename
+from maldroid_conf import *
 
-
-""" Global Vars :P """
-MAX_UPLOAD_SIZE = 32 * 1024 * 1024 # Limit upload size to 30MB
-UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads/apk_samples')
 
 
 """ Flask application configuration """
 app = Flask(__name__)
 app.config.from_object(__name__)
+""" Init the DB Path """
+SQLITE_DB = os.path.join(app.root_path, SQLITE_DB)
+#print "[DBG] Path to sqlite DB {}".format(SQLITE_DB)
 app.config.update(dict(
-	DATABASE = os.path.join(app.root_path, 'maldroid.db'),
+	DATABASE = SQLITE_DB,
 	DEBUG = True,
 	UPLOAD_FOLDER = UPLOAD_FOLDER,
 	MAX_CONTENT_LENGTH = MAX_UPLOAD_SIZE
@@ -103,8 +106,11 @@ def analyze():
 	sha     = hashlib.sha256(open(full_apk_name,'r').read()).hexdigest()
 
 	""" Here is where we'll run all of the malware analysis modules """
-	# Place holder report, to test functionality
-	report = json.dumps({'test1':{'res1':"Result of scan 1", 'res2':"Result of scan 2"}})
+
+	MAE = MAEngine(full_apk_name, sha, SQLITE_DB)
+	p = multiprocessing.Process(target=MAE.run_tests, args=())
+	p.start()
+
 	""" End malware analysis """
 
 	# Insert the results into the DB
@@ -114,8 +120,10 @@ def analyze():
 	# Ensure that this sample hasn't already been by the DB.
 	cur.execute('SELECT * FROM reports WHERE digest=?', (sha,))
 	if not cur.fetchall():
+		# Note that we use a place holder for the report, this will be
+		# updated later.
 		cur.execute('INSERT INTO reports (digest, comname, tstamp, report)\
-		 VALUES (?,?,?,?)', (sha, apkname, tstamp, report))
+		 VALUES (?,?,?,?)', (sha, apkname, tstamp, ""))
 	db.commit()
 	return redirect(url_for('submission', fname=apkname, sum=sha))
 
