@@ -6,8 +6,6 @@ import os
 from androguard.core import androconf
 from androguard.core.bytecodes import apk
 from androguard.core.analysis import risk
-
-sys.path.append('./elsim/')
 from elsim.elsign import dalvik_elsign
 
 
