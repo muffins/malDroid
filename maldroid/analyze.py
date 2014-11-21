@@ -27,7 +27,7 @@ class analyze:
     def check_db(self):
 
         s = dalvik_elsign.MSignature('signatures/dbandroguard',
-                'signatures/dbconfig', True,
+                'signatures/dbconfig', False,
                 ps=dalvik_elsign.PublicSignature)
 
         if self.a.is_valid_APK():
