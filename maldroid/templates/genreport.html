@@ -27,19 +27,36 @@
 <div class="container">
     <div class="jumbotron">
       {% if not report %}
-        <h3> Report for {{comname}} is not yet ready.  Please try again shortly.</h3>
+        <h2> Report for {{comname}} is not yet ready.  Please try again shortly.</h2>
       {% else %}
-        <h3>Report for - {{comname}}</h3>
-        <p>SHA256 - {{digest}}
-          <br>Time Stamp - {{tstamp}}
+        <h2>Report for {{comname}}</h2>
+        <p>SHA256: {{digest}}
+          <br>App submitted for analysis on: {{tstamp}} UTC
           <br>
-            Report:<br>
-              Androguard<br>
+              <h3>Androguard Analysis</h3><br>
               {% for r in report.keys() %}
-                {{r}} - {{report[r]}}<br>
-                {% for k in report[r].keys() %}
-                  {{k}} - {{report[r][k]}} <br>
-                {% endfor %}
+                {% if r == "androguard_perms" %}
+                  <h4>Requested Android Permissions:</h4><br>
+                  {% for k in report[r].keys() %}
+                    {{k.split(".")[-1]}} - {{report[r][k][-1]}}<br>
+                  {% endfor %}
+                  <br><br>
+                {% elif r == "androguard_risk" %}
+                  <h4>Androguard Risk Assessment:</h4><br>
+                  {% for k in report[r].keys() %}
+                    {% if k == "RedFlags" %}
+                        {% for flag in report[r][k].keys() %}
+                          {{flag}}:
+                            {% for val in report[r][k][flag].keys() %}
+                              {{val}} - {{report[r][k][flag][val]}},
+                            {% endfor %}<br>
+                        {% endfor %}
+                    {% elif k == "FuzzyRisk"%}
+                      Fuzzy Risk - {{report[r][k]["VALUE"]}}
+                    {% endif %}
+                  {% endfor %}
+                  <br><br>
+                {% endif %}
               {% endfor %}
         </p>
       {% endif %}
