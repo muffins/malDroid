@@ -1,5 +1,4 @@
-# Check_db and check_risk when result in a "KILLED" message after running for a VERY long time. Possibly my VM does not have enough resources
-# Still need to work on those two methods
+""" Main class used to perform different malware analysis functions """
 import sys
 import os
 
@@ -23,6 +22,12 @@ class analyze:
                 print 'ERROR', e
         else:
             return 'Not an APK file'
+    
+    """ 
+    Checks the given sample against a database to see if it is already listed as Malware. Different databases can be used
+    to have up-to-date results. Returns "None" if not in the database or it returns the common name of the malware sample
+    
+    """
 
     def check_db(self):
 
@@ -34,7 +39,13 @@ class analyze:
             return s.check_apk(self.a)
         else:
             print 'INVALID'
-
+    
+    """ 
+    Returns the permissions requested in the manifest file. Also provides a detailed description of what the permissions 
+    allow the application to do as well as whether it is dangerous.
+ 
+    """
+   
     def check_permissions(self):
 
         if self.a.is_valid_APK():
@@ -55,6 +66,8 @@ class analyze:
             return self.a.get_services()
         else:
             print 'INVALID'
+
+    """ """
 
     def check_risk(self):
 
