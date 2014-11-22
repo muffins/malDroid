@@ -141,9 +141,19 @@ def genreport():
 	# that it will never be the
 	# wait. we shouldn't ever get more than one, as we already
 	# check for this above...
-	#rep = cur.fetchall()[0]
 	rep = cur.fetchone()
-	return render_template('genreport.html', report=rep)
+	digest  = ''
+	tstamp  = ''
+	comname = ''
+	report  = ''
+	if rep["report"]:
+		digest  = rep["digest"]
+		tstamp  = strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime(rep["tstamp"]))
+		comname = rep["comname"]
+		report  = json.loads(rep["report"])
+		return render_template('genreport.html', report=report, digest=digest, tstamp=tstamp, comname=comname)
+	else:
+		return render_template('genreport.html', report='', digest='', tstamp='', comname='')
 
 
 """ Route for the reporting engine """

@@ -26,10 +26,24 @@
 
 <div class="container">
     <div class="jumbotron">
-      <h3>Report for - {{report.comname}}</h3>
-      <p>SHA256 - {{report.digest}}
-        <br>Report - {{report.report}}
-        <br>Time Stamp - {{report.tstamp}}</p>
+      {% if not report %}
+        <h3> Report for {{comname}} is not yet ready.  Please try again shortly.</h3>
+      {% else %}
+        <h3>Report for - {{comname}}</h3>
+        <p>SHA256 - {{digest}}
+          <br>Time Stamp - {{tstamp}}
+          <br>
+            Report:<br>
+              Androguard<br>
+              {% for r in report.keys() %}
+                {{r}} - {{report[r]}}<br>
+                {% for k in report[r].keys() %}
+                  {{k}} - {{report[r][k]}} <br>
+                {% endfor %}
+              {% endfor %}
+        </p>
+      {% endif %}
+
     </div>
 </div>
 {% endblock %}

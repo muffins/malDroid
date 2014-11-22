@@ -23,7 +23,7 @@ class MAEngine():
 
     digest  = '' # digest of the sample, used to lookup the db entry
     apk     = '' # Place holder for the Androguard APK object
-    rep     = '' # Place holder for the report generated.
+    rep     = {} # Place holder for the report generated.
     db_path = ''
 
     """ Init digest and APK variable """
@@ -37,8 +37,8 @@ class MAEngine():
     finishes executiong by calling the 'report' function, which simply updates
     the DB record with the 'report' which is really just a JSON blob """
     def run_tests(self):
-        self.rep += json.dumps(self.apk.check_permissions())
-        self.rep += json.dumps(self.apk.check_risk())
+        self.rep["androguard_perms"] = self.apk.check_permissions()
+        self.rep["androguard_risk"] = self.apk.check_risk()
 
         # This is just for ease of use. Now we ensure that the report will
         # be inserted as soon as all tests have completed. Also now we only
@@ -49,6 +49,6 @@ class MAEngine():
     def report(self):
         conn = sqlite3.connect(self.db_path)
         cur = conn.cursor()
-        cur.execute('UPDATE reports SET report=? WHERE digest=?', (self.rep, self.digest))
+        cur.execute('UPDATE reports SET report=? WHERE digest=?', (json.dumps(self.rep), self.digest))
         conn.commit()
         conn.close()
