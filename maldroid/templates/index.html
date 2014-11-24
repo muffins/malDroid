@@ -26,13 +26,13 @@
 <div class="container">
 
     <div class="jumbotron">
-        <h1>Welcome to malDroid</h1>
-        <p>Welcome to the Android Malicious Application Scanner, or malDroid.  This utility is designed to scan potentially malicious Android Applications and provide as much information as possible for forensic and malware analysis.<br>For more information check out what we're all <a href="{{url_for('about')}}">about</a></p>
+        <h2>Welcome to malDroid</h2>
+        Welcome to the Android Malicious Application Scanner, or malDroid.  This utility is designed to scan potentially malicious Android Applications and provide as much information as possible for forensic and malware analysis.<br>For more information check out what we're all <a href="{{url_for('about')}}">about</a>
     </div>
 
     <div class="row">
 		<div class="col-md-8 col-md-offset-5">
-			<h2>Upload an APK</h2>
+			<h3>Upload an APK</h3>
 			<form action="{{ url_for('upload') }}" method=post enctype=multipart/form-data>
 	    		<p>
 	    			<input type=file name=file>

@@ -30,7 +30,7 @@
       <h2> Reports </h2>
 
       {% if reports %}
-        <p> Below you can select from our available analyses:</p>
+        <h4>Below you can select from our available analyses:</h4>
         <form action="{{url_for('genreport')}}" id="selection">
           <select name="selectedreport" form="selection">
             {% for r in reports %}
@@ -39,7 +39,7 @@
           </select><br><input type="Submit">
         </form>
       {% else %}
-        <p>There are currently no analyses in our database. Please submit a sample <a href="{{url_for('home')}}">here</a> first.</p>
+        There are currently no analyses in our database. Please submit a sample <a href="{{url_for('home')}}">here</a> first.
       {% endif %}
 
     </div>

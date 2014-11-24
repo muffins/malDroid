@@ -26,9 +26,9 @@
 
 <div class="container">
     <div class="jumbotron">
-      <h2> Your sample has been successfully submitted! We have begun processing your sample, it should be finished shortly.</h2>
-      <p> To see the results check the <a href="{{ url_for('reports') }}">reports</a> section and select the entry below.</p>
-      <p>{{ appname }}<br>Sha 256: {{ digest }}</p>
+      <h4> Your sample has been successfully submitted! We have begun processing your sample, it should be finished shortly.</h4>
+      To see the results check the <a href="{{ url_for('reports') }}">reports</a> section and select the entry below.
+      {{ appname }}<br>Sha 256: {{ digest }}
     </div>
 </div>
 {% endblock %}

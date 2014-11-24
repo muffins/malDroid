@@ -7,7 +7,7 @@
 	approachable information regarding the behavior of potentially malicious APK
 	files.
 
-	This project is still under *heavy* construction ;)
+	This project is still under construction ;)
 
 	Nick Anderson		- muffins@isis.poly.edu
 	Michael Thompson	- mt1553@nyu.edu
@@ -28,13 +28,13 @@ from werkzeug import secure_filename
 from maldroid_conf import *
 
 
-
 """ Flask application configuration """
 app = Flask(__name__)
 app.config.from_object(__name__)
+
+
 """ Init the DB Path """
 SQLITE_DB = os.path.join(app.root_path, SQLITE_DB)
-#print "[DBG] Path to sqlite DB {}".format(SQLITE_DB)
 app.config.update(dict(
 	DATABASE = SQLITE_DB,
 	DEBUG = True,
@@ -75,9 +75,7 @@ def init_app():
 		os.makedirs(UPLOAD_FOLDER)
 
 
-# TODO: Make this more robust, call to 'file' and parse results,
-# find some way to ensure the file is a .APK before commiting to
-# analysis.
+# TODO: Use Androguard to verify file is an APK
 """ Function to ensure that uploaded file is an APK """
 def allowed_file(fname):
 	return '.' in fname and fname.split('.')[-1] == 'apk'
@@ -90,8 +88,7 @@ def upload():
 		file = request.files['file']
 		if file and allowed_file(file.filename):
 			fname = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(file.filename))
-			# TODO: Potential issue. What happens if I upload different
-			# files with the same name?
+			# TODO: What happens if I upload different files with the same name?
 			file.save(fname)
 			return redirect(url_for('analyze', fname=fname))
 	return redirect(url_for('invalid_file'))
@@ -105,13 +102,11 @@ def analyze():
 	apkname = os.path.basename(full_apk_name)
 	sha     = hashlib.sha256(open(full_apk_name,'r').read()).hexdigest()
 
-	""" Here is where we'll run all of the malware analysis modules """
-
+	""" Begin Analysis """
 	MAE = MAEngine(full_apk_name, sha, SQLITE_DB)
 	p = multiprocessing.Process(target=MAE.run_tests, args=())
 	p.start()
-
-	""" End malware analysis """
+	""" End Analysis """
 
 	# Insert the results into the DB
 	db  = get_db()
@@ -120,8 +115,6 @@ def analyze():
 	# Ensure that this sample hasn't already been by the DB.
 	cur.execute('SELECT * FROM reports WHERE digest=?', (sha,))
 	if not cur.fetchall():
-		# Note that we use a place holder for the report, this will be
-		# updated later.
 		cur.execute('INSERT INTO reports (digest, comname, tstamp, report)\
 		 VALUES (?,?,?,?)', (sha, apkname, tstamp, ""))
 	db.commit()
@@ -136,11 +129,6 @@ def genreport():
 	r   = request.args.get('selectedreport')
 	cur.execute('SELECT digest, comname, report, tstamp \
 	 	FROM reports WHERE digest=?', (r,))
-	# TODO: What happens if we get more than one : \
-	# we could just use fetchone... We need to ensure
-	# that it will never be the
-	# wait. we shouldn't ever get more than one, as we already
-	# check for this above...
 	rep = cur.fetchone()
 	digest  = ''
 	tstamp  = ''
@@ -159,7 +147,6 @@ def genreport():
 """ Route for the reporting engine """
 @app.route('/reports')
 def reports():
-	# Display a selection of all possible reports.
 	db   = get_db()
 	cur  = db.cursor()
 	cur.execute('SELECT * FROM reports ORDER BY tstamp desc')

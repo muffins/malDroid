@@ -8,7 +8,6 @@ import sys
 import sqlite3
 import json
 
-
 """
     This class is the primary malware analysis driver.
     It should take as it's only argument the full path
@@ -16,7 +15,6 @@ import json
     JSON report about the app, or an error in the instance
     where the app was not an Android APK, or if there were
     any parsing issues.
-
 
 """
 
@@ -35,17 +33,17 @@ class MAEngine():
         #self.vt  = VTWrapper(app_name, True, digest)
         self.db_path = db
 
-    """ This is the meat of the stew. All malware tests are launched here,
+    """
+    This is the meat of the stew. All malware tests are launched here,
     and subsequently all report data should be fed back here. This function
     finishes executiong by calling the 'report' function, which simply updates
-    the DB record with the 'report' which is really just a JSON blob """
+    the DB record with the 'report' which is really just a JSON blob
+    """
     def run_tests(self):
         self.rep["androguard_perms"] = self.apk.check_permissions()
         self.rep["androguard_risk"]  = self.apk.check_risk()
 
-        # This is just for ease of use. Now we ensure that the report will
-        # be inserted as soon as all tests have completed. Also now we only
-        # need 2 threads :P
+        # Begin processing report once finished with analyses
         self.report()
 
     """ This function simply updates the DB entry with the JSON report """
