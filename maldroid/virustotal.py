@@ -32,7 +32,7 @@ import simplejson
 
 from maldroid_conf import *
 
-DEBUG = False
+DEBUG = True
 
 #Uploads file to VirusTotal. Returns response from VirusTotal  --> HELPER FUNCTION
 def upload(fname, fbuffer):
@@ -68,7 +68,6 @@ def rescan(resource):
 def Submitter(apk_file):
 	
 	apk_buffer = open(apk_file, "rb").read()
-	#apk_buffer = open("./samples/malicious/SMSZombie/40F3F16742CD8AC8598BF859A23AC290.apk", "rb").read()
 
 	#Compute sha256 hash over given file
 	hash = hashlib.sha256(apk_buffer).hexdigest()
@@ -76,6 +75,9 @@ def Submitter(apk_file):
 	#Check if file was already submitted. If not response_code == 0 	
 	initial_chk = report(hash)
 
+	if DEBUG:
+		print "[Initial] Initial check completed"
+		print "[Initial] Response Code: ", initial_chk['response_code']
 
 	if initial_chk['response_code'] == 1:
 		
@@ -87,12 +89,16 @@ def Submitter(apk_file):
 		if (curr_time - retn_time) < 259200: # 3 Days
 
 			if DEBUG:
-				print "Recent report was found without needing to upload file!!"
+				print "[Recent] Recent report was found without needing to upload file!!"
 			
 			#Return report in JSON format 
 			return simplejson.dumps(initial_chk)
 
 		else:
+			if DEBUG:
+				print "[Rescan] The last report was at: ", time.asctime( time.localtime(float(tuple_id[1])) )
+				count = 0
+ 
 			#try block ?
 			#If already submitted but report is not recent rescan. 
 			rescan_res = rescan(hash)
@@ -102,13 +108,17 @@ def Submitter(apk_file):
 			while report_chk['response_code'] == -2:
 				
 				if DEBUG:
-					print "Report not ready will try agin in 15 seconds ... "				
+					print "[Rescan] Report not ready will try agin in 15 seconds ... "
+					print "[Rescan] Response Code: ", report_chk['response_code']
+					count += 1				
 
 				time.sleep(15)
 				report_chk = report(rescan_res['scan_id'])
 
 			if DEBUG:
-				print "Scan finised!!!"
+				print "[Rescan] Scan finised!!!"
+				print "[Rescan] Scan took %s seconds" % (count*15)
+				print "[Rescan] Finally Response Code: ", report_chk['response_code']
 
 			#Return report in JSON format
 			return simplejson.dumps(report_chk)
@@ -116,30 +126,33 @@ def Submitter(apk_file):
 	else:
 
 		if DEBUG:
-			print "Uploading ... "			
+			print "[Upload] Uploading ... "			
 		
 		#Upload file to VT since it wasn't available		
 		upload_res = upload(apk_file, apk_buffer)
-		
-
-		#upload_res = upload("./samples/malicious/SMSZombie/40F3F16742CD8AC8598BF859A23AC290.apk", apk_buffer)		
-			
-
 		upload_chk = report(upload_res['scan_id'])
 
+		if DEBUG:
+			print "[Upload] Report check completed"
+                	print "[Upload] Response Code: ", upload_chk['response_code']
+			count = 0
+
 		#Continue checking for until report is finished
-		while upload_chk['response_code'] == -2
+		while upload_chk['response_code'] == -2:
 
 			if DEBUG:
-				print "Report not ready will try agin in 15 seconds ... "
+				print "[Upload] Report not ready will try agin in 15 seconds ... "
+				print "[Upload] Response Code: ", upload_chk['response_code']
+				count += 1
 
 			time.sleep(15)
-			upload_chk = report(upload_res['scan_id']
-
+			upload_chk = report(upload_res['scan_id'])
+		
 
 		if DEBUG:
-			print "Scan finised!!!"
+			print "[Upload] Scan finised!!!"
+			print "[Upload] Scan took %s seconds" % (count*15)
+			print "[Upload] Finally Response Code: ", upload_chk['response_code']
 
 		#Return report in JSON format
 		return simplejson.dumps(upload_chk)
-
