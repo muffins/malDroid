@@ -31,150 +31,139 @@ Things still need to work on:
 * General Error Checking
 
 """
-#import hashlib
+
 import postfile
 import time
 import urllib
 import urllib2
-import simplejson
+import json
 
 from maldroid_conf import *
 
-
-
 class VTWrapper:
-	DEBUG   = True
-	fname   = ''
-	fbuffer = ''
-	digest  = ''
+    DEBUG   = True
+    fname   = ''
+    fbuffer = ''
+    digest  = ''
 
-	def __init__(self, dbg, fname, digest):
-		self.DEBUG   = dbg
-		self.fname   = fname
-		self.digest  = digest
-		self.fbuffer = open(self.fname, 'rb').read()
+    def __init__(self, fname, digest, dbg=True):
+        self.DEBUG   = dbg
+        self.fname   = fname
+        self.digest  = digest
+        self.fbuffer = open(self.fname, 'rb').read()
 
-	#Uploads file to VirusTotal. Returns response from VirusTotal  --> HELPER FUNCTION
-	def upload(self):
-		host = "www.virustotal.com"
-		selector = "https://www.virustotal.com/vtapi/v2/file/scan"
-		fields = [("apikey", APIKEY)]
-		files = [("file", self.fname, self.fbuffer)]
-		json = postfile.post_multipart(host, selector, fields, files)
-		return simplejson.loads(json)
+    #Uploads file to VirusTotal. Returns response from VirusTotal  --> HELPER FUNCTION
+    def upload(self):
+        host = "www.virustotal.com"
+        selector = "https://www.virustotal.com/vtapi/v2/file/scan"
+        fields = [("apikey", APIKEY)]
+        files = [("file", self.fname, self.fbuffer)]
+        resp = postfile.post_multipart(host, selector, fields, files)
+        return json.loads(resp)
 
-	#Get (or try to get) report using resource (hash or scan_id).
-	#Returns response from VirusTotal --> HELPER FUNCTION
-	def report(self, resource):
-		url = "https://www.virustotal.com/vtapi/v2/file/report"
-		parameters = {"resource": resource, "apikey": APIKEY}
-		data = urllib.urlencode(parameters)
-		req = urllib2.Request(url, data)
-		response = urllib2.urlopen(req)
-		json = response.read()
-		return simplejson.loads(json)
+    #Get (or try to get) report using resource (hash or scan_id).
+    #Returns response from VirusTotal --> HELPER FUNCTION
+    def report(self, resource):
+        url = "https://www.virustotal.com/vtapi/v2/file/report"
+        parameters = {"resource": resource, "apikey": APIKEY}
+        data = urllib.urlencode(parameters)
+        req = urllib2.Request(url, data)
+        resp = urllib2.urlopen(req).read()
+        return json.loads(resp)
 
-	#Performs a rescan, instead of just uploading, using resource (hash or scan_id). Returns response from VirusTotal --> HELPER FUNCTION
-	def rescan(self, resource):
-		url = "https://www.virustotal.com/vtapi/v2/file/rescan"
-		parameters = {"resource": resource, "apikey": APIKEY}
-		data = urllib.urlencode(parameters)
-		req = urllib2.Request(url, data)
-		response = urllib2.urlopen(req)
-		json = response.read()
-		return simplejson.loads(json)
+    #Performs a rescan, instead of just uploading, using resource (hash or scan_id). Returns response from VirusTotal --> HELPER FUNCTION
+    def rescan(self, resource):
+        url = "https://www.virustotal.com/vtapi/v2/file/rescan"
+        parameters = {"resource": resource, "apikey": APIKEY}
+        data = urllib.urlencode(parameters)
+        req = urllib2.Request(url, data)
+        resp = urllib2.urlopen(req).read()
+        return json.loads(resp)
 
 
-	#Main function which should be used to return a report in JSON format given a file.
-	def Submitter(self):
+    #Main function which should be used to return a report in JSON format given a file.
+    def Submitter(self):
 
-		#XXX: We already have this
-		#apk_buffer = open(apk_file, "rb").read()
+        #Check if file was already submitted. If not response_code == 0
+        initial_chk = self.report(self.digest)
 
-		#Compute sha256 hash over given file
-		#XXX: We already have this
-		#self.digesthash = hashlib.sha256(apk_buffer).hexdigest()
+        if self.DEBUG:
+            print "[Initial] Initial check completed"
+            print "[Initial] Response Code: ", initial_chk['response_code']
 
-		#Check if file was already submitted. If not response_code == 0
-		initial_chk = self.report(self.digest)
+        if initial_chk['response_code'] == 1:
 
-		if self.DEBUG:
-			print "[Initial] Initial check completed"
-			print "[Initial] Response Code: ", initial_chk['response_code']
+            tuple_id = initial_chk['scan_id'].split("-")
+            retn_time = int(tuple_id[1])
+            curr_time = int(time.time())
 
-		if initial_chk['response_code'] == 1:
+            #If file was already submitted and report is available, check if it is recent. less than 3 days
+            if (curr_time - retn_time) < 259200: # 3 Days
 
-			tuple_id = initial_chk['scan_id'].split("-")
-			retn_time = int(tuple_id[1])
-			curr_time = int(time.time())
+                if self.DEBUG:
+                    print "[Recent] Recent report was found without needing to upload file!!\n\n"
 
-			#If file was already submitted and report is available, check if it is recent. less than 3 days
-			if (curr_time - retn_time) < 259200: # 3 Days
+                #Return report in JSON format
+                return initial_chk
 
-				if self.DEBUG:
-					print "[Recent] Recent report was found without needing to upload file!!"
+            else:
+                if self.DEBUG:
+                    print "[Rescan] The last report was at: ", time.asctime( time.localtime(float(tuple_id[1])) )
+                    count = 0
 
-				#Return report in JSON format
-				return simplejson.dumps(initial_chk)
+                #If already submitted but report is not recent rescan.
+                rescan_res = self.rescan(self.digest)
+                report_chk = self.report(rescan_res['scan_id'])
 
-			else:
-				if self.DEBUG:
-					print "[Rescan] The last report was at: ", time.asctime( time.localtime(float(tuple_id[1])) )
-					count = 0
+                #Continue checking for until report is finished
+                while report_chk['response_code'] == -2:
 
-				#If already submitted but report is not recent rescan.
-				rescan_res = self.rescan(self.digest)
-				report_chk = self.report(rescan_res['scan_id'])
+                    if self.DEBUG:
+                        print "[Rescan] Report not ready will try agin in 2 minutes..."
+                        print "[Rescan] Response Code: ", report_chk['response_code']
+                        count += 1
 
-				#Continue checking for until report is finished
-				while report_chk['response_code'] == -2:
+                    time.sleep(120)
+                    report_chk = self.report(rescan_res['scan_id'])
 
-					if self.DEBUG:
-						print "[Rescan] Report not ready will try agin in 15 seconds ... "
-						print "[Rescan] Response Code: ", report_chk['response_code']
-						count += 1
+                if self.DEBUG:
+                    print "[Rescan] Scan finised!!!"
+                    print "[Rescan] Scan took %u seconds" % (count*15)
+                    print "[Rescan] Final Response Code: ", report_chk['response_code']
 
-					time.sleep(15)
-					report_chk = self.report(rescan_res['scan_id'])
+                #Return report in JSON format
+                return report_chk
 
-				if self.DEBUG:
-					print "[Rescan] Scan finised!!!"
-					print "[Rescan] Scan took %u seconds" % (count*15)
-					print "[Rescan] Final Response Code: ", report_chk['response_code']
+        else:
 
-				#Return report in JSON format
-				return simplejson.dumps(report_chk)
+            if self.DEBUG:
+                print "[Upload] Uploading ... "
 
-		else:
+            #Upload file to VT since it wasn't available
+            upload_res = self.upload()
+            upload_chk = self.report(upload_res['scan_id'])
 
-			if self.DEBUG:
-				print "[Upload] Uploading ... "
+            if self.DEBUG:
+                print "[Upload] Report check completed"
+                print "[Upload] Response Code: ", upload_chk['response_code']
+                count = 0
 
-			#Upload file to VT since it wasn't available
-			upload_res = self.upload()
-			upload_chk = self.report(upload_res['scan_id'])
+            #Continue checking for until report is finished
+            while upload_chk['response_code'] == -2:
 
-			if self.DEBUG:
-				print "[Upload] Report check completed"
-	                	print "[Upload] Response Code: ", upload_chk['response_code']
-				count = 0
+                if self.DEBUG:
+                    print "[Upload] Report not ready will try agin in 15 seconds ... "
+                    print "[Upload] Response Code: ", upload_chk['response_code']
+                    count += 1
 
-			#Continue checking for until report is finished
-			while upload_chk['response_code'] == -2:
-
-				if self.DEBUG:
-					print "[Upload] Report not ready will try agin in 15 seconds ... "
-					print "[Upload] Response Code: ", upload_chk['response_code']
-					count += 1
-
-				time.sleep(15)
-				upload_chk = self.report(upload_res['scan_id'])
+                time.sleep(15)
+                upload_chk = self.report(upload_res['scan_id'])
 
 
-			if self.DEBUG:
-				print "[Upload] Scan finised!!!"
-				print "[Upload] Scan took %u seconds" % (count*15)
-				print "[Upload] Final Response Code: ", upload_chk['response_code']
+            if self.DEBUG:
+                print "[Upload] Scan finised!!!"
+                print "[Upload] Scan took %u seconds" % (count*15)
+                print "[Upload] Final Response Code: ", upload_chk['response_code']
 
-			#Return report in JSON format
-			return simplejson.dumps(upload_chk)
+            #Return report in JSON format
+            return upload_chk

@@ -1,6 +1,6 @@
 
 from analyze import analyze # Wrapper for androguard scanning
-#from virustotal import VTWrapper # wrapper for VirusTotal submission
+from virustotal import VTWrapper # wrapper for VirusTotal submission
 from maldroid_conf import *
 
 import os
@@ -30,7 +30,7 @@ class MAEngine():
     def __init__(self, app_name, s, db):
         self.digest = s
         self.apk = analyze(app_name)
-        #self.vt  = VTWrapper(app_name, True, digest)
+        self.vt  = VTWrapper(app_name, s)
         self.db_path = db
 
     """
@@ -40,6 +40,7 @@ class MAEngine():
     the DB record with the 'report' which is really just a JSON blob
     """
     def run_tests(self):
+        self.rep["virustotal"]       = self.vt.Submitter()
         self.rep["androguard_perms"] = self.apk.check_permissions()
         self.rep["androguard_risk"]  = self.apk.check_risk()
 

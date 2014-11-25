@@ -25,6 +25,7 @@ from analysisdriver import MAEngine
 from time import gmtime, strftime
 from flask import Flask, request, session, g, redirect, url_for, abort, render_template, flash
 from werkzeug import secure_filename
+from androguard.core import androconf
 from maldroid_conf import *
 
 
@@ -75,10 +76,11 @@ def init_app():
 		os.makedirs(UPLOAD_FOLDER)
 
 
-# TODO: Use Androguard to verify file is an APK
 """ Function to ensure that uploaded file is an APK """
-def allowed_file(fname):
-	return '.' in fname and fname.split('.')[-1] == 'apk'
+def check_apk(fname):
+	if androconf.is_android(fname) == "APK":
+		return True
+	return False
 
 
 """ Route for uploading sample """
@@ -86,11 +88,15 @@ def allowed_file(fname):
 def upload():
 	if request.method == 'POST':
 		file = request.files['file']
-		if file and allowed_file(file.filename):
+		#if file and check_apk(file.filename):
+		if file:
 			fname = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(file.filename))
 			# TODO: What happens if I upload different files with the same name?
 			file.save(fname)
-			return redirect(url_for('analyze', fname=fname))
+			if check_apk(fname):
+				return redirect(url_for('analyze', fname=fname))
+			else:
+				os.remove(fname)
 	return redirect(url_for('invalid_file'))
 
 
@@ -139,9 +145,10 @@ def genreport():
 		tstamp  = strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime(rep["tstamp"]))
 		comname = rep["comname"]
 		report  = json.loads(rep["report"])
-		return render_template('genreport.html', report=report, digest=digest, tstamp=tstamp, comname=comname)
+		score   = float(report["virustotal"]["positives"])/float(report["virustotal"]["total"])
+		return render_template('genreport.html', report=report, digest=digest, tstamp=tstamp, comname=comname, score=score)
 	else:
-		return render_template('genreport.html', report='', digest='', tstamp='', comname='')
+		return render_template('genreport.html', report='', digest='', tstamp='', comname='', score=0)
 
 
 """ Route for the reporting engine """
