@@ -96,7 +96,7 @@ class VTWrapper:
 		#self.digesthash = hashlib.sha256(apk_buffer).hexdigest()
 
 		#Check if file was already submitted. If not response_code == 0
-		initial_chk = report(self.digest)
+		initial_chk = self.report(self.digest)
 
 		if self.DEBUG:
 			print "[Initial] Initial check completed"
@@ -122,7 +122,6 @@ class VTWrapper:
 					print "[Rescan] The last report was at: ", time.asctime( time.localtime(float(tuple_id[1])) )
 					count = 0
 
-				#try block ?
 				#If already submitted but report is not recent rescan.
 				rescan_res = self.rescan(self.digest)
 				report_chk = self.report(rescan_res['scan_id'])
@@ -140,8 +139,8 @@ class VTWrapper:
 
 				if self.DEBUG:
 					print "[Rescan] Scan finised!!!"
-					print "[Rescan] Scan took %s seconds" % (count*15)
-					print "[Rescan] Finally Response Code: ", report_chk['response_code']
+					print "[Rescan] Scan took %u seconds" % (count*15)
+					print "[Rescan] Final Response Code: ", report_chk['response_code']
 
 				#Return report in JSON format
 				return simplejson.dumps(report_chk)
@@ -174,8 +173,8 @@ class VTWrapper:
 
 			if self.DEBUG:
 				print "[Upload] Scan finised!!!"
-				print "[Upload] Scan took %s seconds" % (count*15)
-				print "[Upload] Finally Response Code: ", upload_chk['response_code']
+				print "[Upload] Scan took %u seconds" % (count*15)
+				print "[Upload] Final Response Code: ", upload_chk['response_code']
 
 			#Return report in JSON format
 			return simplejson.dumps(upload_chk)
