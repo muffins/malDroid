@@ -136,19 +136,16 @@ def genreport():
 	cur.execute('SELECT digest, comname, report, tstamp \
 	 	FROM reports WHERE digest=?', (r,))
 	rep = cur.fetchone()
-	digest  = ''
-	tstamp  = ''
-	comname = ''
+	digest  = rep["digest"]
+	tstamp  = strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime(rep["tstamp"]))
+	comname = rep["comname"]
 	report  = ''
 	if rep["report"]:
-		digest  = rep["digest"]
-		tstamp  = strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime(rep["tstamp"]))
-		comname = rep["comname"]
 		report  = json.loads(rep["report"])
 		score   = float(report["virustotal"]["positives"])/float(report["virustotal"]["total"])
 		return render_template('genreport.html', report=report, digest=digest, tstamp=tstamp, comname=comname, score=score)
 	else:
-		return render_template('genreport.html', report='', digest='', tstamp='', comname='', score=0)
+		return render_template('genreport.html', report='', digest=digest, tstamp=tstamp, comname=comname, score=0)
 
 
 """ Route for the reporting engine """

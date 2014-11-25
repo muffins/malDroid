@@ -27,19 +27,19 @@
 <div class="container">
     <div class="jumbotron">
       {% if not report %}
-        <h2> Report for {{comname}} is not yet ready.  Please try again shortly.</h2>
+        <h2> Report for {{comname|safe}} is not yet ready.  Please try again shortly.</h2>
       {% else %}
-        <h3>Report for {{comname}}</h3>
+        <h3>Report for {{comname|safe}}</h3>
         {% if score < 0.10 %}
-          <p class="bg-success">{{comname}} has a low probability of being malicious.</p>
+          <p class="bg-success">{{comname|safe}} has a low probability of being malicious.</p>
         {% elif score >= 0.10 and score < 0.40 %}
-          <p class="bg-warning">{{comname}} has a <strong>medium</strong> probability of being malicious!</p>
+          <p class="bg-warning">{{comname|safe}} has a <strong>medium</strong> probability of being malicious!</p>
         {% elif score >= 0.40 and score < 0.70 %}
-          <p class="bg-danger">{{comname}} has a <strong>high</strong> probability of being malicious!</p>
+          <p class="bg-danger">{{comname|safe}} has a <strong>high</strong> probability of being malicious!</p>
         {% elif score >= 0.70 and score <= 1 %}
-          <p class="bg-danger">{{comname}} is <strong>very likely</strong> malicious!</p>
+          <p class="bg-danger">{{comname|safe}} is <strong>very likely</strong> malicious!</p>
         {% else %}
-          <p class="bg-info">Unable to compute malicious score for {{comname}}.</p>
+          <p class="bg-info">Unable to compute malicious score for {{comname|safe}}.</p>
         {% endif %}
 
         <br>SHA256: {{digest}}
@@ -48,7 +48,7 @@
 
           <!-- Virus Total -->
           <h3>Virus Total</h3><br>
-          {{comname}} falgged as malicious on <strong>{{report["virustotal"]["positives"]}}
+          {{comname|safe}} flagged as malicious on <strong>{{report["virustotal"]["positives"]}}
           out of {{report["virustotal"]["total"]}}</strong> AV engines.  See the Virus Total
           Analysis below for full details:
           <br>{{report["virustotal"]["permalink"]}}
