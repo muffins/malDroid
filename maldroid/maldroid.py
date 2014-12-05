@@ -67,11 +67,12 @@ def close_db(error):
 
 """ Function to stand up the Database and the uploads folder """
 def init_app():
-	with app.app_context():
-		db = get_db()
-		with app.open_resource('schema.sql', mode='r') as f:
-			db.cursor().executescript(f.read())
-		db.commit()
+	if not os.path.exists(os.path.join(app.root_path, "maldroid.db")):
+		with app.app_context():
+			db = get_db()
+			with app.open_resource('schema.sql', mode='r') as f:
+				db.cursor().executescript(f.read())
+			db.commit()
 	if not os.path.exists(UPLOAD_FOLDER):
 		os.makedirs(UPLOAD_FOLDER)
 
