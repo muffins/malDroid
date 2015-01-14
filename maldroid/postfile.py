@@ -1,3 +1,11 @@
+"""
+  Helper script for submitting APK samples to VirusTotal:
+  https://www.virustotal.com/en/documentation/public-api/
+
+  This code was taken from:
+  http://code.activestate.com/recipes/146306/
+"""
+
 import httplib, mimetypes
 
 def post_multipart(host, selector, fields, files):

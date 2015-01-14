@@ -1,13 +1,9 @@
 """
 
-	malDroid.py
-
 	malDroid is a project dedicated to open source mobile malware analysis.  This
-	projects goals are to provide forensic investigators and malware analysts with
-	approachable information regarding the behavior of potentially malicious APK
-	files.
-
-	This project is still under construction ;)
+	projects goals are to provide forensic investigators,malware analysts, and
+	the lay-person with	approachable information regarding the behavior of
+	potentially malicious Android applications.
 
 	Nick Anderson		- muffins@isis.poly.edu
 	Michael Thompson	- mt1553@nyu.edu
@@ -20,7 +16,6 @@ import hashlib
 import multiprocessing
 import json
 import time
-from analyze import analyze
 from analysisdriver import MAEngine
 from time import gmtime, strftime
 from flask import Flask, request, session, g, redirect, url_for, abort, render_template, flash

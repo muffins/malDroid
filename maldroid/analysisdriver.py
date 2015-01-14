@@ -1,6 +1,6 @@
 
-from analyze import analyze # Wrapper for androguard scanning
-from virustotal import VTWrapper # wrapper for VirusTotal submission
+from androguardw import AndroguardW # Wrapper for androguard scanning
+from virustotalw import VTWrapper   # wrapper for VirusTotal submission
 from maldroid_conf import *
 
 import os
@@ -21,16 +21,16 @@ import json
 class MAEngine():
 
     digest  = '' # digest of the sample, used to lookup the db entry
-    apk     = '' # Place holder for the Androguard wrapper class
+    aw      = '' # Place holder for the Androguard wrapper class
     vt      = '' # Place holder for the VirusTotal wrapper class
     rep     = {} # Place holder for the report generated.
-    db_path = ''
+    db_path = '' # Place holder for the sqlite3 database.
 
     """ Init digest and APK variable """
     def __init__(self, app_name, s, db):
-        self.digest = s
-        self.apk = analyze(app_name)
-        self.vt  = VTWrapper(app_name, s)
+        self.digest  = s
+        self.aw      = AndroguardW(app_name)
+        self.vt      = VTWrapper(app_name, False)
         self.db_path = db
 
     """
@@ -40,9 +40,11 @@ class MAEngine():
     the DB record with the 'report' which is really just a JSON blob
     """
     def run_tests(self):
-        self.rep["virustotal"]       = self.vt.Submitter()
-        self.rep["androguard_perms"] = self.apk.check_permissions()
-        self.rep["androguard_risk"]  = self.apk.check_risk()
+        self.rep["virustotal"]            = self.vt.submit()
+        self.rep["androguard_perms"]      = self.aw.check_permissions()
+        self.rep["androguard_activities"] = self.aw.check_activities()
+        self.rep["androguard_services"]   = self.aw.check_services()
+        self.rep["androguard_risk"]       = self.aw.check_risk()
 
         # Begin processing report once finished with analyses
         self.report()

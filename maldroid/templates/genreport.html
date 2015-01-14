@@ -27,7 +27,7 @@
 <div class="container">
     <div class="jumbotron">
       {% if not report %}
-        <h2> Report for {{comname|safe}} is not yet ready.  Please try again shortly.</h2>
+        <h3>Report for {{comname|safe}} is not yet ready.  Please try again shortly.</h3>
       {% else %}
         <h3>Report for {{comname|safe}}</h3>
         {% if score < 0.10 %}
@@ -46,27 +46,45 @@
         <br>App submitted for analysis on: {{tstamp}} UTC
         <br>
 
-          <!-- Virus Total -->
-          <h3>Virus Total</h3><br>
-          {{comname|safe}} flagged as malicious on <strong>{{report["virustotal"]["positives"]}}
-          out of {{report["virustotal"]["total"]}}</strong> AV engines.  See the Virus Total
-          Analysis below for full details:
-          <br>{{report["virustotal"]["permalink"]}}
-          <!-- End Virus Total -->
+            <!-- Virus Total -->
+            <h3>Virus Total</h3><br>
+            {{comname|safe}} flagged as malicious on <strong>{{report["virustotal"]["positives"]}}
+            out of {{report["virustotal"]["total"]}}</strong> AV engines.  See the Virus Total
+            Analysis below for full details:
+            <br>{{report["virustotal"]["permalink"]}}
+            <!-- End Virus Total -->
 
-          <br><br>
+            <br><br>
 
-          <!-- Androguard -->
-          <h3>Androguard Analysis</h3><br>
-          <h4>Requested Android Permissions:</h4><br>
-          {% if report["androguard_perms"] %}
-            {% for k in report["androguard_perms"].keys() %}
-              {{k.split(".")[-1]}} - {{report["androguard_perms"][k][-1]}}<br>
-            {% endfor %}
-          {% else %}
-            <strong>Androguard was unable to parse the requested permissions!</strong>
-          {% endif %}
-          <br><br>
+            <!-- Androguard -->
+            <h3>Androguard Analysis</h3><br>
+            <h4>Requested Android Permissions:</h4><br>
+            {% if report["androguard_perms"] %}
+                {% for k in report["androguard_perms"].keys() %}
+                    {{k.split(".")[-1]}} - {{report["androguard_perms"][k][-1]}}<br>
+                {% endfor %}
+            {% else %}
+                <strong>Androguard was unable to parse the requested permissions!</strong>
+            {% endif %}
+            <br><br>
+            <h4>Registered Android Activities:</h4><br>
+            {% if report["androguard_activities"] %}
+                {% for k in report["androguard_activities"].keys() %}
+                    {{k.split(".")[-1]}} - {{report["androguard_activities"][k][-1]}}<br>
+                {% endfor %}
+            {% else %}
+                <strong>Androguard was unable to parse the registered activities!</strong>
+            {% endif %}
+            <br><br>
+            <h4>Registered Android Services:</h4><br>
+            {% if report["androguard_services"] %}
+                {% for k in report["androguard_services"].keys() %}
+                    {{k.split(".")[-1]}} - {{report["androguard_services"][k][-1]}}<br>
+                {% endfor %}
+            {% else %}
+                <strong>Androguard was unable to parse the registered activities!</strong>
+            {% endif %}
+            <br><br>
           <h4>Androguard Risk Assessment:</h4><br>
           {% if report["androguard_risk"] %}
             {% for k in report["androguard_risk"].keys() %}
@@ -84,9 +102,10 @@
           {% else %}
             <strong>Androguard was unable to assess the applications risk score!</strong>
           {% endif %}
+          <br><br>
           <!-- End Androguard -->
 
-          <br><br>
+
 
         </p>
       {% endif %}

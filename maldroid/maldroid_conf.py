@@ -10,4 +10,7 @@ import os
 MAX_UPLOAD_SIZE = 64 * 1024 * 1024 # Limit upload size to 64MB
 UPLOAD_FOLDER   = os.path.join(os.getcwd(), 'uploads/apk_samples')
 SQLITE_DB       = "maldroid.db"
-APIKEY		= "1b5439e68266c59ffc4972a08dc77614cfe69440d9672c5cf77cb94cee7bac6d"  #Used to authenticate connections with VirusTotal
+APIKEY          = "1b5439e68266c59ffc4972a08dc77614cfe69440d9672c5cf77cb94cee7bac6d"  #Used to authenticate connections with VirusTotal
+LOG_FILE        = "maldroid.log"
+
+
