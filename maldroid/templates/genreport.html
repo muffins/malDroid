@@ -61,39 +61,64 @@
             <h4>Requested Android Permissions:</h4><br>
             {% if report["androguard_perms"] %}
                 {% for k in report["androguard_perms"].keys() %}
-                    {{k.split(".")[-1]}} - {{report["androguard_perms"][k][-1]}}<br>
+                    <div class="media">
+                        <div class="media-body">
+                            <h5 class="media-heading">{{k.split(".")[-1]}}</h5>
+                            {{report["androguard_perms"][k][-1]}}
+                        </div>
+                        <br>
+                    <div>
                 {% endfor %}
             {% else %}
                 <strong>Androguard was unable to parse the requested permissions!</strong>
             {% endif %}
             <br><br>
+
             <h4>Registered Android Activities:</h4><br>
             {% if report["androguard_activities"] %}
-                {% for k in report["androguard_activities"].keys() %}
-                    {{k.split(".")[-1]}} - {{report["androguard_activities"][k][-1]}}<br>
+                <table>
+                {% for a in report["androguard_activities"] %}
+                    <tr><td>{{a}}</td></tr>
                 {% endfor %}
+                </table>
             {% else %}
                 <strong>Androguard was unable to parse the registered activities!</strong>
             {% endif %}
             <br><br>
+
             <h4>Registered Android Services:</h4><br>
             {% if report["androguard_services"] %}
-                {% for k in report["androguard_services"].keys() %}
-                    {{k.split(".")[-1]}} - {{report["androguard_services"][k][-1]}}<br>
+                <table>
+                {% for s in report["androguard_services"] %}
+                    <tr><td>{{s}}</td></tr>
                 {% endfor %}
+                </table>
             {% else %}
                 <strong>Androguard was unable to parse the registered activities!</strong>
             {% endif %}
             <br><br>
+
           <h4>Androguard Risk Assessment:</h4><br>
           {% if report["androguard_risk"] %}
             {% for k in report["androguard_risk"].keys() %}
               {% if k == "RedFlags" %}
                   {% for flag in report["androguard_risk"][k].keys() %}
-                    {{flag}}:
+                    <div class="table-responsive">
+                        <table class="table">
+                        <thead>
+                            {{flag}}
+                        </thead>
                       {% for val in report["androguard_risk"][k][flag].keys() %}
-                        {{val}} - {{report["androguard_risk"][k][flag][val]}},
-                      {% endfor %}<br>
+                        <tbody>
+                            <tr>
+                                <td><small>{{val}}<small></td>
+                                <td> </td>
+                                <td>{{report["androguard_risk"][k][flag][val]}}</td>
+                            </tr>
+                        </tbody>
+                      {% endfor %}
+                    </table>
+                    </div>
                   {% endfor %}
               {% elif k == "FuzzyRisk"%}
                 Fuzzy Risk - {{report["androguard_risk"][k]["VALUE"]}}
